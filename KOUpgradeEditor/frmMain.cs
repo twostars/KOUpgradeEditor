@@ -280,7 +280,7 @@ namespace KOUpgradeEditor
                             else
                                 r.RequiredItems[0] = s.ID;
 
-                            r.Item = weaponUpgradeIDs[n];
+                            r.Item = weaponUpgradeIDs[n] + sr.Grade;
                             r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
                             upgradeRows.Add(r.Index, r);
                         }
