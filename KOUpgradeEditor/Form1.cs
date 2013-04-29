@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
@@ -73,14 +72,10 @@ namespace KOUpgradeEditor
             s.Rates = new List<Rate>();
 
             for (int i = 0; i < 11; i++)
-            {
                 s.Rates.Add(new Rate() { Cost = 0, Grade = i, Percent = 10000 });
-            }
-
 
             _scrolls.Add(s.ID, s);
             lbScrolls.Items.Add(s);
-
         }
 
         private void lbGrades_SelectedIndexChanged(object sender, EventArgs e)
@@ -95,19 +90,15 @@ namespace KOUpgradeEditor
             txtTrinaPercent.Text = ((UpgradeScroll)lbScrolls.SelectedItem).Rates[r.Grade].TrinaPercent.ToString();
         }
 
-        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            
-        }
-
         private void lbScrolls_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(lbScrolls.SelectedItem == null)
+            if (lbScrolls.SelectedItem == null)
                 return;
+
+            UpgradeScroll s = (UpgradeScroll)lbScrolls.SelectedItem;
 
             lbGrades.Items.Clear();
 
-            UpgradeScroll s = (UpgradeScroll)lbScrolls.SelectedItem;
             checkGrade(s.Grade);
             checkType(s.Type);
 
@@ -116,9 +107,7 @@ namespace KOUpgradeEditor
             cbWeapon.Checked = s.Weapon;
 
             foreach (Rate r in s.Rates)
-            {
                 lbGrades.Items.Add(r);
-            }
 
             lblSelectedScroll.Text = s.Name;
             lbGrades.SelectedIndex = 0;
@@ -179,10 +168,11 @@ namespace KOUpgradeEditor
                 Rate sr = us.Rates[0];
                 if (us.Type == UpgradeScroll.UpgradeType.ELEMENT || us.Type == UpgradeScroll.UpgradeType.ACCESSORYCOMPOUND)
                 {
-                    if(i.isAccessory)
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Modifier = (id - i.ID), Name = "Unique Accessory Elemental Unlock", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = i.Extension };
+                    if (i.isAccessory)
+                        r = new UpgradeRow(CURRENT_ACCESSORY_INDEX++, (id - i.ID), "Unique Accessory Elemental Unlock", sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", i.Extension);
                     else
-                        r = new UpgradeRow() { Index = CURRENT_WEAPON_INDEX++, Modifier = (id - i.ID), Name = "Unique Weapon Elemental Unlock", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = i.Extension };
+                        r = new UpgradeRow(CURRENT_WEAPON_INDEX++, (id - i.ID), "Unique Weapon Elemental Unlock", sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", i.Extension);
+
                     r.RequiredItems[0] = us.ID;
                     r.Item = i.ExtensionID;
                     r.Percent = us.Rates[0].Percent;
@@ -195,9 +185,9 @@ namespace KOUpgradeEditor
                     {
                         sr = us.Rates[c];
                         if(i.isAccessory && us.Accessory)
-                            r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Modifier = us.Modifier, Name = "Unique Accessory Upgrade (" + i.Name.Replace("'", "''") + ")", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = i.Extension };
+                            r = new UpgradeRow(CURRENT_ACCESSORY_INDEX++, us.Modifier, "Unique Accessory Upgrade (" + i.Name.Replace("'", "''") + ")", sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", i.Extension);
                         else
-                            r = new UpgradeRow() { Index = CURRENT_WEAPON_INDEX++, Modifier = us.Modifier, Name = "Unique Weapon Upgrade (" + i.Name.Replace("'", "''") + ")", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = i.Extension };
+                            r = new UpgradeRow(CURRENT_WEAPON_INDEX++, us.Modifier, "Unique Weapon Upgrade (" + i.Name.Replace("'", "''") + ")", sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", i.Extension);
                         r.RequiredItems[0] = us.ID;
                          
                         r.Item = (_items[id].ExtensionID+(c-1));
@@ -276,260 +266,74 @@ namespace KOUpgradeEditor
                 {
                     case UpgradeScroll.UpgradeType.REGULAR:
                         #region Generic Item Upgrades
-                        //Regular Upgrades
-                        r = new UpgradeRow() { Index = CURRENT_WEAPON_INDEX++, Modifier = s.Modifier, Name = "Generic Weapon Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
+
+                        string[] weaponUpgradeNames = { "", "Reduce", "Poison" };
+                        int[] weaponUpgradeIDs = { 0, 30, 40 };
+                        for (int n = 0; n < weaponUpgradeNames.Length; n++)
                         {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
+                            r = new UpgradeRow(CURRENT_WEAPON_INDEX++, s.Modifier, "Generic Weapon Upgrade" + (weaponUpgradeNames[n].Length > 0 ? " (" + weaponUpgradeNames[n] + ")" : ""), sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")");
+                            if (c == 0)
+                            {
+                                r.RequiredItems[0] = TRINA_ID;
+                                r.RequiredItems[1] = s.ID;
+                            }
+                            else
+                                r.RequiredItems[0] = s.ID;
+
+                            r.Item = weaponUpgradeIDs[n];
+                            r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
+                            upgradeRows.Add(r.Index, r);
                         }
-                        else
-                            r.RequiredItems[0] = s.ID;
 
-                        r.Item = i;
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
+                        string[] armorUpgradeNames = { "", "Strength", "Intelligence", "Magic Power", "Health", "Dexterity", "Intelligence", "Magic Power" };
+                        int[] armorUpgradeIDs = { 0, 10, 20, 30, 500, 510, 520, 530 };
 
-                        //Reduced Upgrades
-                        r = new UpgradeRow() { Index = CURRENT_WEAPON_INDEX++, Modifier = s.Modifier, Name = "Generic Weapon Upgrade (Reduce)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
+                        for (int n = 0; n < armorUpgradeNames.Length; n++)
                         {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
+                            r = new UpgradeRow(CURRENT_ARMOR_INDEX++, s.Modifier, "Generic Armor Upgrade" + (armorUpgradeNames[n].Length > 0 ? " (" + armorUpgradeNames[n] + ")" : ""), sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")");
+                            if (c == 0)
+                            {
+                                r.RequiredItems[0] = TRINA_ID;
+                                r.RequiredItems[1] = s.ID;
+                            }
+                            else
+                                r.RequiredItems[0] = s.ID;
+                            r.Item = i + armorUpgradeIDs[n];
+                            r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
+                            upgradeRows.Add(r.Index, r);
+                            r = r.Clone();
+                            r.Index = CURRENT_HIGHARMOR_INDEX++;
+                            upgradeRows.Add(r.Index, r);
                         }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 30);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-
-                        //Poison Upgrades
-                        r = new UpgradeRow() { Index = CURRENT_WEAPON_INDEX++, Modifier = s.Modifier, Name = "Generic Weapon Upgrade (Poison)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 40);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-
-                        //Armor Upgrades
-
-                        //Regular Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = i;
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
-                        //Strength Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade (Strength)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 10);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
-
-                        //Intelligence Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade (Intelligence)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 20);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
-
-                        //Magic Power Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade (Magic Power)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 30);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
-
-                        //HP Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade (Health)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 500);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
-
-                        //Dexterity Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade (Dexterity)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 510);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
-
-                        //Intelligence Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade (Intelligence)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 520);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
-
-
-                        //Magic Power Upgrade
-                        r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Upgrade (Magic Power)", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        if (c == 0)
-                        {
-                            r.RequiredItems[0] = TRINA_ID;
-                            r.RequiredItems[1] = s.ID;
-                        }
-                        else
-                            r.RequiredItems[0] = s.ID;
-                        r.Item = (i + 530);
-                        r.Percent = c == 0 ? sr.TrinaPercent : sr.Percent;
-                        upgradeRows.Add(r.Index, r);
-                        r = r.Clone();
-                        r.Index = CURRENT_HIGHARMOR_INDEX++;
-                        upgradeRows.Add(r.Index, r);
                         #endregion
                         break;
                     case UpgradeScroll.UpgradeType.ACCESSORYCOMPOUND:
                         #region Generic Accessories
-                        //Accessories
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 10, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 20, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 30, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 70, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
+                        int[] arr = { 0, 10, 20, 30, 70 };
+                        int[] arr2 = { 500, 510, 520, 530, 550, 560, 570, 580, 600, 610, 620, 630, 650, 660, 670, 680, 700, 710, 720, 730 };
+                        for (int n = 0; n < arr.Length; n++)
+                        {
+                            r = new UpgradeRow(CURRENT_ACCESSORY_INDEX++, s.Modifier, "Generic Accessory Upgrade", sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")");
+                            r.Item = i + arr[n];
+                            r.Percent = sr.Percent;
+                            r.RequiredItems[0] = s.ID;
+                            upgradeRows.Add(r.Index, r);
+                        }
+
                         sr = s.Rates[i + 10];
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 500, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 510, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 520, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 530, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 550, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 560, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 570, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 580, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 600, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 610, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 620, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 630, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 650, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 660, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 670, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 680, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 700, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 710, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 720, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
-                        r = new UpgradeRow() { Index = CURRENT_ACCESSORY_INDEX++, Item = i + 730, Percent = sr.Percent, Modifier = s.Modifier, Name = "Generic Accessory Upgrade", Note = "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")", Cost = sr.Cost, Extension = -1 };
-                        r.RequiredItems[0] = s.ID;
-                        upgradeRows.Add(r.Index, r);
+
+                        for (int n = 0; n < arr2.Length; n++)
+                        {
+                            r = new UpgradeRow(CURRENT_ACCESSORY_INDEX++, s.Modifier, "Generic Accessory Upgrade", sr.Cost, "(+" + sr.Grade + " -> +" + (sr.Grade + 1) + ")");
+                            r.Item = i + arr2[n];
+                            r.Percent = sr.Percent;
+                            r.RequiredItems[0] = s.ID;
+                            upgradeRows.Add(r.Index, r);
+                        }
                         #endregion 
                         break;
                     case UpgradeScroll.UpgradeType.ACCESSORYENCHANT:
-                        #region Accessory Enchants
+                    #region Accessory Enchants
                     Dictionary<int, int> items = new Dictionary<int, int>();
                     switch (s.ID)
                     {
@@ -583,16 +387,16 @@ namespace KOUpgradeEditor
             CURRENT_ARMOR_INDEX = ARMOR_INDEX;
             CURRENT_HIGHARMOR_INDEX = HIGH_ARMOR_INDEX;
             CURRENT_ACCESSORY_INDEX = ACCESSORY_INDEX;
+
             upgradeRows.Clear();
+
             foreach(UpgradeScroll s in _scrolls.Values)
             {
 
                 if (s.Type == UpgradeScroll.UpgradeType.REGULAR || s.Type == UpgradeScroll.UpgradeType.ACCESSORYCOMPOUND || s.Type == UpgradeScroll.UpgradeType.ACCESSORYENCHANT)
                 {
                     for (int i = 1; i < 11; i++)
-                    {
                         setGenericItemUpgrades(s, i);
-                    }
                 }
                 else
                 {
@@ -602,10 +406,10 @@ namespace KOUpgradeEditor
 
                         Rate sr = s.Rates[i];
                         UpgradeRow r = new UpgradeRow();
-                        if(s.Weapon)
-                            r = new UpgradeRow() { Index = CURRENT_WEAPON_INDEX++, Modifier = s.Modifier, Name = "Generic Weapon Alteration", Note = "", Cost = sr.Cost, Extension = -1 };
-                        else if(s.Armor)
-                            r = new UpgradeRow() { Index = CURRENT_ARMOR_INDEX++, Modifier = s.Modifier, Name = "Generic Armor Alteration", Note = "", Cost = sr.Cost, Extension = -1 };
+                        if (s.Weapon)
+                            r = new UpgradeRow(CURRENT_WEAPON_INDEX++, s.Modifier, "Generic Weapon Alteration", sr.Cost);
+                        else if (s.Armor)
+                            r = new UpgradeRow(CURRENT_ARMOR_INDEX++, s.Modifier, "Generic Armor Alteration", sr.Cost);
 
                         r.RequiredItems[0] = s.ID;
                         r.Item = i;
@@ -626,66 +430,84 @@ namespace KOUpgradeEditor
                       from ITEM order by Num 
              * 
              */
-            using (System.IO.StreamReader reader = new System.IO.StreamReader("items.txt"))
+            int x = 1, id;
+            string str;
+            try
             {
-                string str;
-                while ((str = reader.ReadLine()) != null)
+                using (System.IO.StreamReader reader = new System.IO.StreamReader("items.txt"))
                 {
-                    char[] separator = new char[] { '\t' };
-                    string[] strArray = str.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-                    int id = int.Parse(strArray[0]);
-                    if (!_items.ContainsKey(id))
+                    while ((str = reader.ReadLine()) != null)
                     {
-                        Item newItem = new Item(id, strArray[2]);
-                        if (strArray[1] != "NULL")
-                            newItem.Extension = int.Parse(strArray[1]);
-                        else
-                            newItem.Extension = -1;
+                        string[] strArray = str.Split(new char[] { '\t' });
 
-                        newItem.Damage = int.Parse(strArray[3]);
-                        newItem.Defense = int.Parse(strArray[4]);
-                        newItem.RequiredLevel = int.Parse(strArray[5]);
-                        newItem.DaggerAC = int.Parse(strArray[6]);
-                        newItem.SwordAC = int.Parse(strArray[7]);
-                        newItem.MaceAC = int.Parse(strArray[8]);
-                        newItem.AxeAC = int.Parse(strArray[9]);
-                        newItem.SpearAC = int.Parse(strArray[10]);
-                        newItem.BowAC = int.Parse(strArray[11]);
-                        newItem.FireDamage = int.Parse(strArray[12]);
-                        newItem.IceDamage = int.Parse(strArray[13]);
-                        newItem.LightDamage = int.Parse(strArray[14]);
-                        newItem.PoisonDamage = int.Parse(strArray[15]);
-                        newItem.HPDrain = int.Parse(strArray[16]);
-                        newItem.MPDamage = int.Parse(strArray[17]);
-                        newItem.MPDrain = int.Parse(strArray[18]);
-                        newItem.MirrorDamage = int.Parse(strArray[19]);
-                        newItem.Grade = int.Parse(strArray[20]);
-                        newItem.Strength = int.Parse(strArray[21]);
-                        newItem.Health = int.Parse(strArray[22]);
-                        newItem.Dexterity = int.Parse(strArray[23]);
-                        newItem.Intelligence = int.Parse(strArray[24]);
-                        newItem.MagicPower = int.Parse(strArray[25]);
-                        newItem.MaxHealth = int.Parse(strArray[26]);
-                        newItem.MaxMana = int.Parse(strArray[27]);
-                        newItem.FireResist = int.Parse(strArray[28]);
-                        newItem.IceResist = int.Parse(strArray[29]);
-                        newItem.LightResist = int.Parse(strArray[30]);
-                        newItem.MagicResist = int.Parse(strArray[31]);
-                        newItem.PoisonResist = int.Parse(strArray[32]);
-                        newItem.CurseResist = int.Parse(strArray[33]);
-                        newItem.Type = int.Parse(strArray[34]);
-                        newItem.Slot = int.Parse(strArray[35]);
-                        newItem.UniqueID = int.Parse(strArray[36]);
-                        _items.Add(id, newItem);
+                        if (strArray.Length != 37)
+                        {
+                            MessageBox.Show("Line " + x + " of items.txt is invalid. Should contain a total of 37 columns, instead has " + strArray.Length + " columns.");
+                            Application.Exit();
+                            return;
+                        }
+
+                        x++;
+                        id = int.Parse(strArray[0]);
+
+                        if (!_items.ContainsKey(id))
+                        {
+                            Item newItem = new Item(id, strArray[2]);
+                            if (strArray[1] != "NULL")
+                                newItem.Extension = int.Parse(strArray[1]);
+                            else
+                                newItem.Extension = -1;
+
+                            newItem.Damage = int.Parse(strArray[3]);
+                            newItem.Defense = int.Parse(strArray[4]);
+                            newItem.RequiredLevel = int.Parse(strArray[5]);
+                            newItem.DaggerAC = int.Parse(strArray[6]);
+                            newItem.SwordAC = int.Parse(strArray[7]);
+                            newItem.MaceAC = int.Parse(strArray[8]);
+                            newItem.AxeAC = int.Parse(strArray[9]);
+                            newItem.SpearAC = int.Parse(strArray[10]);
+                            newItem.BowAC = int.Parse(strArray[11]);
+                            newItem.FireDamage = int.Parse(strArray[12]);
+                            newItem.IceDamage = int.Parse(strArray[13]);
+                            newItem.LightDamage = int.Parse(strArray[14]);
+                            newItem.PoisonDamage = int.Parse(strArray[15]);
+                            newItem.HPDrain = int.Parse(strArray[16]);
+                            newItem.MPDamage = int.Parse(strArray[17]);
+                            newItem.MPDrain = int.Parse(strArray[18]);
+                            newItem.MirrorDamage = int.Parse(strArray[19]);
+                            newItem.Grade = int.Parse(strArray[20]);
+                            newItem.Strength = int.Parse(strArray[21]);
+                            newItem.Health = int.Parse(strArray[22]);
+                            newItem.Dexterity = int.Parse(strArray[23]);
+                            newItem.Intelligence = int.Parse(strArray[24]);
+                            newItem.MagicPower = int.Parse(strArray[25]);
+                            newItem.MaxHealth = int.Parse(strArray[26]);
+                            newItem.MaxMana = int.Parse(strArray[27]);
+                            newItem.FireResist = int.Parse(strArray[28]);
+                            newItem.IceResist = int.Parse(strArray[29]);
+                            newItem.LightResist = int.Parse(strArray[30]);
+                            newItem.MagicResist = int.Parse(strArray[31]);
+                            newItem.PoisonResist = int.Parse(strArray[32]);
+                            newItem.CurseResist = int.Parse(strArray[33]);
+                            newItem.Type = int.Parse(strArray[34]);
+                            newItem.Slot = int.Parse(strArray[35]);
+                            newItem.UniqueID = int.Parse(strArray[36]);
+
+                            _items.Add(id, newItem);
+                        }
                     }
+                    reader.Close();
                 }
-                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while loading items.txt - " + ex.Message);
             }
         }
 
+        // update current entry
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            //update current entry
             int newCost, newPercent, newModifier, newTrinaPercent = 0, selectedIndex;
             selectedIndex = lbGrades.SelectedIndex;
             try
@@ -695,7 +517,7 @@ namespace KOUpgradeEditor
                 newModifier = int.Parse(txtModifier.Text);
                 newTrinaPercent = gradeLevel == UpgradeScroll.GradeLevel.BLESSED ? int.Parse(txtTrinaPercent.Text) : 0;
             }
-            catch (Exception ex)
+            catch
             {
                 MessageBox.Show("Cost and Percent must be valid integers (Cost 0 - 2100000000; Percent 0 - 10000)", "Invalid data");
                 return;
@@ -738,11 +560,10 @@ namespace KOUpgradeEditor
             lbGrades.SelectedIndex = selectedIndex;
         }
 
+        // save scrolls and their rates
         private void btnSave_Click(object sender, EventArgs e)
         {
-            //save scrolls and their rates
             saveScrolls();
-           
         }
 
         private void saveScrolls()
@@ -756,7 +577,6 @@ namespace KOUpgradeEditor
 
         private void loadScrolls()
         {
-            //load scrolls
             try
             {
                 Stream stream = File.Open("scrolls.ob", FileMode.Open);
@@ -765,9 +585,9 @@ namespace KOUpgradeEditor
                 stream.Close();
                 setScrollsList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                MessageBox.Show("There was a problem reading scrolls.ob","Upgrade Editor");
+                MessageBox.Show("There was a problem reading scrolls.ob - " + ex.Message + ex.StackTrace,"Upgrade Editor");
             }
         }
 
@@ -777,9 +597,7 @@ namespace KOUpgradeEditor
             lbGrades.Items.Clear();
 
             foreach (UpgradeScroll s in _scrolls.Values)
-            {
                 lbScrolls.Items.Add(s);
-            }
 
             if (lbScrolls.Items.Count > 0)
                 lbScrolls.SelectedIndex = 0;
@@ -788,6 +606,7 @@ namespace KOUpgradeEditor
         private void rbGrade_CheckedChanged(object sender, EventArgs e)
         {
             gradeLevel = (UpgradeScroll.GradeLevel)Enum.Parse(typeof(UpgradeScroll.GradeLevel), ((string)((RadioButton)sender).Tag));
+
             if (gradeLevel == UpgradeScroll.GradeLevel.BLESSED)
             {
                 txtTrinaPercent.Visible = true;

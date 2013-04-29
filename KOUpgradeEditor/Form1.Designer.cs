@@ -35,6 +35,9 @@
             this.cmsScrollList = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cbAccessory = new System.Windows.Forms.CheckBox();
+            this.cbArmor = new System.Windows.Forms.CheckBox();
+            this.cbWeapon = new System.Windows.Forms.CheckBox();
             this.txtTrinaPercent = new System.Windows.Forms.TextBox();
             this.txtModifier = new System.Windows.Forms.TextBox();
             this.lblSelectedScroll = new System.Windows.Forms.Label();
@@ -60,9 +63,6 @@
             this.lbGrades = new System.Windows.Forms.ListBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnDump = new System.Windows.Forms.Button();
-            this.cbWeapon = new System.Windows.Forms.CheckBox();
-            this.cbArmor = new System.Windows.Forms.CheckBox();
-            this.cbAccessory = new System.Windows.Forms.CheckBox();
             this.cmsScrollList.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.gbType.SuspendLayout();
@@ -74,7 +74,7 @@
             this.lbScrolls.FormattingEnabled = true;
             this.lbScrolls.Location = new System.Drawing.Point(12, 12);
             this.lbScrolls.Name = "lbScrolls";
-            this.lbScrolls.Size = new System.Drawing.Size(120, 212);
+            this.lbScrolls.Size = new System.Drawing.Size(179, 212);
             this.lbScrolls.TabIndex = 1;
             this.lbScrolls.SelectedIndexChanged += new System.EventHandler(this.lbScrolls_SelectedIndexChanged);
             this.lbScrolls.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbScrolls_MouseDown);
@@ -83,12 +83,12 @@
             // 
             this.txtScrollID.Location = new System.Drawing.Point(12, 230);
             this.txtScrollID.Name = "txtScrollID";
-            this.txtScrollID.Size = new System.Drawing.Size(120, 20);
+            this.txtScrollID.Size = new System.Drawing.Size(179, 20);
             this.txtScrollID.TabIndex = 2;
             // 
             // btnAdd
             // 
-            this.btnAdd.Location = new System.Drawing.Point(138, 230);
+            this.btnAdd.Location = new System.Drawing.Point(197, 227);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
             this.btnAdd.TabIndex = 3;
@@ -101,14 +101,14 @@
             this.cmsScrollList.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.removeToolStripMenuItem});
             this.cmsScrollList.Name = "cmsScrollList";
-            this.cmsScrollList.Size = new System.Drawing.Size(114, 26);
+            this.cmsScrollList.Size = new System.Drawing.Size(118, 26);
             // 
             // removeToolStripMenuItem
             // 
             this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            this.removeToolStripMenuItem.Size = new System.Drawing.Size(113, 22);
+            this.removeToolStripMenuItem.Size = new System.Drawing.Size(117, 22);
             this.removeToolStripMenuItem.Text = "Remove";
-            this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+            this.removeToolStripMenuItem.Visible = false;
             // 
             // groupBox1
             // 
@@ -128,12 +128,42 @@
             this.groupBox1.Controls.Add(this.gbType);
             this.groupBox1.Controls.Add(this.gbGrade);
             this.groupBox1.Controls.Add(this.lbGrades);
-            this.groupBox1.Location = new System.Drawing.Point(138, 12);
+            this.groupBox1.Location = new System.Drawing.Point(197, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(510, 212);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Settings";
+            // 
+            // cbAccessory
+            // 
+            this.cbAccessory.AutoSize = true;
+            this.cbAccessory.Location = new System.Drawing.Point(407, 93);
+            this.cbAccessory.Name = "cbAccessory";
+            this.cbAccessory.Size = new System.Drawing.Size(75, 17);
+            this.cbAccessory.TabIndex = 12;
+            this.cbAccessory.Text = "Accessory";
+            this.cbAccessory.UseVisualStyleBackColor = true;
+            // 
+            // cbArmor
+            // 
+            this.cbArmor.AutoSize = true;
+            this.cbArmor.Location = new System.Drawing.Point(407, 69);
+            this.cbArmor.Name = "cbArmor";
+            this.cbArmor.Size = new System.Drawing.Size(53, 17);
+            this.cbArmor.TabIndex = 11;
+            this.cbArmor.Text = "Armor";
+            this.cbArmor.UseVisualStyleBackColor = true;
+            // 
+            // cbWeapon
+            // 
+            this.cbWeapon.AutoSize = true;
+            this.cbWeapon.Location = new System.Drawing.Point(407, 42);
+            this.cbWeapon.Name = "cbWeapon";
+            this.cbWeapon.Size = new System.Drawing.Size(67, 17);
+            this.cbWeapon.TabIndex = 10;
+            this.cbWeapon.Text = "Weapon";
+            this.cbWeapon.UseVisualStyleBackColor = true;
             // 
             // txtTrinaPercent
             // 
@@ -205,7 +235,7 @@
             // 
             // btnUpdate
             // 
-            this.btnUpdate.Location = new System.Drawing.Point(322, 150);
+            this.btnUpdate.Location = new System.Drawing.Point(329, 150);
             this.btnUpdate.Name = "btnUpdate";
             this.btnUpdate.Size = new System.Drawing.Size(75, 23);
             this.btnUpdate.TabIndex = 6;
@@ -389,7 +419,7 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(219, 230);
+            this.btnSave.Location = new System.Drawing.Point(278, 227);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 7;
@@ -399,7 +429,7 @@
             // 
             // btnDump
             // 
-            this.btnDump.Location = new System.Drawing.Point(570, 227);
+            this.btnDump.Location = new System.Drawing.Point(629, 227);
             this.btnDump.Name = "btnDump";
             this.btnDump.Size = new System.Drawing.Size(78, 23);
             this.btnDump.TabIndex = 8;
@@ -407,48 +437,20 @@
             this.btnDump.UseVisualStyleBackColor = true;
             this.btnDump.Click += new System.EventHandler(this.btnDump_Click);
             // 
-            // cbWeapon
-            // 
-            this.cbWeapon.AutoSize = true;
-            this.cbWeapon.Location = new System.Drawing.Point(407, 42);
-            this.cbWeapon.Name = "cbWeapon";
-            this.cbWeapon.Size = new System.Drawing.Size(67, 17);
-            this.cbWeapon.TabIndex = 10;
-            this.cbWeapon.Text = "Weapon";
-            this.cbWeapon.UseVisualStyleBackColor = true;
-            // 
-            // cbArmor
-            // 
-            this.cbArmor.AutoSize = true;
-            this.cbArmor.Location = new System.Drawing.Point(407, 69);
-            this.cbArmor.Name = "cbArmor";
-            this.cbArmor.Size = new System.Drawing.Size(53, 17);
-            this.cbArmor.TabIndex = 11;
-            this.cbArmor.Text = "Armor";
-            this.cbArmor.UseVisualStyleBackColor = true;
-            // 
-            // cbAccessory
-            // 
-            this.cbAccessory.AutoSize = true;
-            this.cbAccessory.Location = new System.Drawing.Point(407, 93);
-            this.cbAccessory.Name = "cbAccessory";
-            this.cbAccessory.Size = new System.Drawing.Size(75, 17);
-            this.cbAccessory.TabIndex = 12;
-            this.cbAccessory.Text = "Accessory";
-            this.cbAccessory.UseVisualStyleBackColor = true;
-            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(660, 260);
+            this.ClientSize = new System.Drawing.Size(713, 260);
             this.Controls.Add(this.lbScrolls);
             this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.btnDump);
             this.Controls.Add(this.btnAdd);
+            this.Controls.Add(this.btnDump);
             this.Controls.Add(this.txtScrollID);
             this.Controls.Add(this.groupBox1);
+            this.MaximizeBox = false;
             this.Name = "frmMain";
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Upgrade Editor";
             this.cmsScrollList.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
